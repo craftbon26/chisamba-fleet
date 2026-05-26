@@ -4,6 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Fleet Management System</title>
+    
+    <!-- PWA Support -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#667eea">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
     <style>
         * {
             margin: 0;
@@ -17,14 +24,12 @@
             min-height: 100vh;
         }
         
-        /* Mobile-first responsive design */
         .container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
         }
         
-        /* Login Form */
         .login-container {
             display: flex;
             justify-content: center;
@@ -59,7 +64,7 @@
             font-weight: 500;
         }
         
-        .input-group input, .input-group select {
+        .input-group input, .input-group select, .input-group textarea {
             width: 100%;
             padding: 12px;
             border: 2px solid #e0e0e0;
@@ -68,7 +73,7 @@
             transition: all 0.3s;
         }
         
-        .input-group input:focus, .input-group select:focus {
+        .input-group input:focus, .input-group select:focus, .input-group textarea:focus {
             outline: none;
             border-color: #667eea;
         }
@@ -90,7 +95,6 @@
             transform: translateY(-2px);
         }
         
-        /* Dashboard Styles */
         .dashboard {
             display: none;
         }
@@ -109,15 +113,15 @@
         
         .nav-links {
             display: flex;
-            gap: 15px;
+            gap: 10px;
             flex-wrap: wrap;
         }
         
         .nav-btn {
+            width: auto;
             padding: 10px 20px;
             background: #f5f5f5;
             color: #333;
-            width: auto;
         }
         
         .nav-btn.active {
@@ -137,7 +141,6 @@
             display: block;
         }
         
-        /* Cards Grid */
         .cards-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -163,7 +166,6 @@
             font-weight: bold;
         }
         
-        /* Tables */
         .table-responsive {
             overflow-x: auto;
         }
@@ -184,11 +186,10 @@
             font-weight: 600;
         }
         
-        /* Forms */
         .form-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
             margin-bottom: 20px;
         }
         
@@ -196,67 +197,12 @@
             grid-column: 1 / -1;
         }
         
-        /* Date Filter */
-        .date-filter {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-            margin-bottom: 20px;
-            padding: 15px;
-            background: #f9f9f9;
-            border-radius: 10px;
-        }
-        
-        .date-filter input {
-            flex: 1;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-        }
-        
-        /* Mobile Menu */
-        .mobile-menu-toggle {
-            display: none;
-            background: none;
-            font-size: 24px;
-            width: auto;
-            padding: 5px 10px;
-        }
-        
-        @media (max-width: 768px) {
-            .container {
-                padding: 10px;
-            }
-            
-            .mobile-menu-toggle {
-                display: block;
-            }
-            
-            .nav-links {
-                display: none;
-                width: 100%;
-                flex-direction: column;
-            }
-            
-            .nav-links.show {
-                display: flex;
-            }
-            
-            .nav-btn {
-                width: 100%;
-            }
-            
-            .form-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-        
-        /* Status Badges */
         .status-badge {
             padding: 4px 8px;
             border-radius: 5px;
             font-size: 12px;
             font-weight: 600;
+            display: inline-block;
         }
         
         .status-available {
@@ -264,7 +210,7 @@
             color: white;
         }
         
-        .status-in-use {
+        .status-inuse {
             background: #ff9800;
             color: white;
         }
@@ -274,7 +220,36 @@
             color: white;
         }
         
-        /* Loading Spinner */
+        .alert {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            animation: slideDown 0.3s ease;
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
         .loading {
             text-align: center;
             padding: 20px;
@@ -295,66 +270,97 @@
             100% { transform: rotate(360deg); }
         }
         
-        .alert {
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 20px;
+        .env-badge {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 11px;
+            font-weight: bold;
+            z-index: 9999;
+            font-family: monospace;
         }
         
-        .alert-success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
+        .env-production {
+            background: #4caf50;
+            color: white;
         }
         
-        .alert-error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
+        .env-development {
+            background: #ff9800;
+            color: white;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .login-card {
+                padding: 20px;
+            }
+            
+            .nav-links {
+                width: 100%;
+            }
+            
+            .nav-btn {
+                flex: 1;
+                text-align: center;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stat-card .value {
+                font-size: 24px;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- Login Form -->
+    <!-- Login Container -->
     <div id="loginContainer" class="login-container">
         <div class="login-card">
-            <h2>Fleet Management System</h2>
+            <h2>🚛 Fleet Management System</h2>
             <form id="loginForm">
                 <div class="input-group">
-                    <label>Email</label>
-                    <input type="email" id="loginEmail" required>
+                    <label>📧 Email</label>
+                    <input type="email" id="loginEmail" required placeholder="Enter your email">
                 </div>
                 <div class="input-group">
-                    <label>Password</label>
-                    <input type="password" id="loginPassword" required>
+                    <label>🔒 Password</label>
+                    <input type="password" id="loginPassword" required placeholder="Enter your password">
                 </div>
                 <button type="submit">Login</button>
             </form>
             <p style="text-align: center; margin-top: 20px;">
-                <a href="#" onclick="showRegister()">Register New Account</a>
+                <a href="#" onclick="showRegister()">Create New Account</a>
             </p>
         </div>
     </div>
     
-    <!-- Registration Form -->
+    <!-- Register Container -->
     <div id="registerContainer" class="login-container" style="display: none;">
         <div class="login-card">
-            <h2>Register</h2>
+            <h2>📝 Register</h2>
             <form id="registerForm">
                 <div class="input-group">
-                    <label>Full Name</label>
-                    <input type="text" id="regName" required>
+                    <label>👤 Full Name</label>
+                    <input type="text" id="regName" required placeholder="John Doe">
                 </div>
                 <div class="input-group">
-                    <label>Email</label>
-                    <input type="email" id="regEmail" required>
+                    <label>📧 Email</label>
+                    <input type="email" id="regEmail" required placeholder="john@example.com">
                 </div>
                 <div class="input-group">
-                    <label>Password</label>
-                    <input type="password" id="regPassword" required>
+                    <label>🔒 Password</label>
+                    <input type="password" id="regPassword" required placeholder="Choose a password">
                 </div>
                 <div class="input-group">
-                    <label>Role</label>
+                    <label>👔 Role</label>
                     <select id="regRole">
                         <option value="driver">Driver</option>
                         <option value="mechanic">Mechanic</option>
@@ -373,45 +379,48 @@
     <div id="dashboard" class="dashboard">
         <div class="container">
             <div class="navbar">
-                <h2>Fleet Management</h2>
-                <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">☰</button>
+                <h2>🚛 Fleet Manager</h2>
                 <div class="nav-links" id="navLinks">
-                    <button class="nav-btn" onclick="showSection('dashboard')">Dashboard</button>
-                    <button class="nav-btn" onclick="showSection('vehicles')">Vehicles</button>
-                    <button class="nav-btn" onclick="showSection('trips')">Trips</button>
-                    <button class="nav-btn" onclick="showSection('maintenance')">Maintenance</button>
-                    <button class="nav-btn" onclick="showSection('reports')">Reports</button>
-                    <button class="nav-btn" onclick="logout()">Logout</button>
+                    <button class="nav-btn" onclick="showSection('dashboard')">📊 Dashboard</button>
+                    <button class="nav-btn" onclick="showSection('vehicles')">🚗 Vehicles</button>
+                    <button class="nav-btn" onclick="showSection('trips')">📅 Trips</button>
+                    <button class="nav-btn" onclick="showSection('maintenance')">🔧 Maintenance</button>
+                    <button class="nav-btn" onclick="showSection('reports')">📈 Reports</button>
+                    <button class="nav-btn" onclick="logout()">🚪 Logout</button>
                 </div>
             </div>
             
             <!-- Dashboard Section -->
             <div id="dashboardSection" class="content-section active">
                 <div class="cards-grid" id="statsCards">
-                    <!-- Stats will be loaded here -->
+                    <div class="loading"><div class="spinner"></div></div>
                 </div>
-                <div id="availabilityCalendar">
-                    <h3>Vehicle Availability</h3>
-                    <div id="availabilityList"></div>
-                </div>
+                <h3>📋 Vehicle Availability (Next 7 Days)</h3>
+                <div id="availabilityList"></div>
             </div>
             
             <!-- Vehicles Section -->
             <div id="vehiclesSection" class="content-section">
-                <h3>Vehicle Management</h3>
+                <h3>🚗 Vehicle Management</h3>
                 <button onclick="showAddVehicleForm()" style="width: auto; margin-bottom: 20px;">+ Add Vehicle</button>
                 <div id="addVehicleForm" style="display: none;" class="form-grid">
-                    <input type="text" id="vehiclePlate" placeholder="Plate Number">
-                    <input type="text" id="vehicleModel" placeholder="Model">
-                    <input type="number" id="vehicleYear" placeholder="Year">
+                    <input type="text" id="vehiclePlate" placeholder="Plate Number (e.g., ABC-123)">
+                    <input type="text" id="vehicleModel" placeholder="Model (e.g., Toyota Camry)">
+                    <input type="number" id="vehicleYear" placeholder="Year (e.g., 2020)">
                     <input type="text" id="vehicleFuelType" placeholder="Fuel Type">
                     <input type="number" id="vehicleCostPerKm" placeholder="Cost per KM" step="0.01">
-                    <button onclick="addVehicle()">Save Vehicle</button>
+                    <button onclick="addVehicle()">💾 Save Vehicle</button>
                 </div>
                 <div class="table-responsive">
                     <table id="vehiclesTable">
                         <thead>
-                            <tr><th>Plate</th><th>Model</th><th>Year</th><th>Status</th><th>Actions</th></tr>
+                            <tr>
+                                <th>Plate</th>
+                                <th>Model</th>
+                                <th>Year</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
                         </thead>
                         <tbody></tbody>
                     </table>
@@ -420,20 +429,30 @@
             
             <!-- Trips Section -->
             <div id="tripsSection" class="content-section">
-                <h3>Book a Trip</h3>
-                <form id="tripForm" class="form-grid">
-                    <select id="tripVehicleId" required></select>
-                    <input type="text" id="tripDriverName" placeholder="Driver Name" required>
-                    <input type="date" id="tripStartDate" required>
-                    <input type="date" id="tripEndDate" required>
-                    <input type="text" id="tripPurpose" placeholder="Purpose" required>
-                    <input type="number" id="tripStartOdometer" placeholder="Start Odometer" required>
-                    <button type="submit">Book Trip</button>
-                </form>
+                <h3>📅 Book New Trip</h3>
+                <div class="form-grid">
+                    <select id="tripVehicleId">
+                        <option value="">Select Vehicle</option>
+                    </select>
+                    <input type="text" id="tripDriverName" placeholder="Driver Name">
+                    <input type="date" id="tripStartDate">
+                    <input type="date" id="tripEndDate">
+                    <input type="text" id="tripPurpose" placeholder="Purpose of Trip">
+                    <input type="number" id="tripStartOdometer" placeholder="Start Odometer (km)">
+                    <button onclick="bookTrip()">📝 Book Trip</button>
+                </div>
+                <h4>Active Trips</h4>
                 <div class="table-responsive">
-                    <h4>Active Trips</h4>
                     <table id="tripsTable">
-                        <thead><tr><th>Vehicle</th><th>Driver</th><th>Start Date</th><th>End Date</th><th>Status</th></tr></thead>
+                        <thead>
+                            <tr>
+                                <th>Vehicle ID</th>
+                                <th>Driver</th>
+                                <th>Start Date</th>
+                                <th>End Date</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
                         <tbody></tbody>
                     </table>
                 </div>
@@ -441,24 +460,34 @@
             
             <!-- Maintenance Section -->
             <div id="maintenanceSection" class="content-section">
-                <h3>Maintenance Records</h3>
-                <form id="maintenanceForm" class="form-grid">
-                    <select id="maintenanceVehicleId" required></select>
-                    <select id="maintenanceType">
-                        <option value="oil">Oil Change</option>
-                        <option value="tires">Tire Rotation</option>
-                        <option value="brakes">Brake Service</option>
-                        <option value="engine">Engine Repair</option>
-                        <option value="other">Other</option>
+                <h3>🔧 Maintenance Records</h3>
+                <div class="form-grid">
+                    <select id="maintenanceVehicleId">
+                        <option value="">Select Vehicle</option>
                     </select>
-                    <input type="number" id="maintenanceCost" placeholder="Cost" step="0.01" required>
-                    <input type="date" id="maintenanceDate" required>
-                    <textarea id="maintenanceDescription" placeholder="Description"></textarea>
-                    <button type="submit">Add Maintenance</button>
-                </form>
+                    <select id="maintenanceType">
+                        <option value="Oil Change">Oil Change</option>
+                        <option value="Tire Rotation">Tire Rotation</option>
+                        <option value="Brake Service">Brake Service</option>
+                        <option value="Engine Repair">Engine Repair</option>
+                        <option value="Inspection">Inspection</option>
+                    </select>
+                    <input type="number" id="maintenanceCost" placeholder="Cost ($)" step="0.01">
+                    <input type="date" id="maintenanceDate">
+                    <textarea id="maintenanceDescription" placeholder="Description" rows="2"></textarea>
+                    <button onclick="addMaintenance()">➕ Add Maintenance</button>
+                </div>
                 <div class="table-responsive">
                     <table id="maintenanceTable">
-                        <thead><tr><th>Vehicle</th><th>Type</th><th>Cost</th><th>Date</th><th>Description</th></tr></thead>
+                        <thead>
+                            <tr>
+                                <th>Vehicle</th>
+                                <th>Type</th>
+                                <th>Cost</th>
+                                <th>Date</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
                         <tbody></tbody>
                     </table>
                 </div>
@@ -466,8 +495,8 @@
             
             <!-- Reports Section -->
             <div id="reportsSection" class="content-section">
-                <h3>Generate Reports</h3>
-                <div class="date-filter">
+                <h3>📈 Generate Reports</h3>
+                <div class="form-grid">
                     <input type="date" id="reportStartDate">
                     <input type="date" id="reportEndDate">
                     <select id="reportType">
@@ -475,8 +504,8 @@
                         <option value="maintenance">Maintenance Report</option>
                         <option value="costs">Cost Report</option>
                     </select>
-                    <button onclick="generateReport()">Generate Report</button>
-                    <button onclick="emailReport()">Email Report</button>
+                    <button onclick="generateReport()">📊 Generate Report</button>
+                    <button onclick="emailReport()">📧 Email Report</button>
                 </div>
                 <div id="reportOutput"></div>
             </div>
@@ -484,26 +513,241 @@
     </div>
     
     <script>
-        const API_URL = 'https://script.google.com/macros/s/AKfycbyPwiKpD7MymR-QMbDuiBx7V9uSKQl1WcRET8b3hTVpz8C06DgLLZ7O02aE3v3JPY6-/exec';
+        // ============================================
+        // CONFIGURATION - UPDATE THIS WITH YOUR SCRIPT ID
+        // ============================================
+        
+        // REPLACE 'YOUR_SCRIPT_ID' with your actual Google Apps Script ID
+        // Example: 'AKfycbx1234567890abcdefghijklmnopqrstuvwxyz'
+        const SCRIPT_ID = 'AKfycbyPwiKpD7MymR-QMbDuiBx7V9uSKQl1WcRET8b3hTVpz8C06DgLLZ7O02aE3v3JPY6-';  // <--- CHANGE THIS
+        
+        // Auto-detect environment
+        const isProduction = window.location.hostname !== 'localhost' && 
+                            !window.location.hostname.includes('127.0.0.1') &&
+                            !window.location.hostname.includes('192.168');
+        
+        // Configuration object
+        const CONFIG = {
+            // Build API URL from script ID
+            API_URL: `https://script.google.com/macros/s/AKfycbyPwiKpD7MymR-QMbDuiBx7V9uSKQl1WcRET8b3hTVpz8C06DgLLZ7O02aE3v3JPY6-/exec`,
+            
+            // Environment settings
+            USE_MOCK: !isProduction,  // Auto-switch to mock in development
+            DEBUG: !isProduction,      // Enable debug logs in development
+            
+            // App info
+            APP_NAME: 'Fleet Management System',
+            APP_VERSION: '1.0.0',
+            ENVIRONMENT: isProduction ? 'PRODUCTION' : 'DEVELOPMENT'
+        };
+        
+        // Display environment badge
+        const badge = document.createElement('div');
+        badge.className = `env-badge env-${isProduction ? 'production' : 'development'}`;
+        badge.textContent = `${CONFIG.ENVIRONMENT} MODE | v${CONFIG.APP_VERSION}`;
+        document.body.appendChild(badge);
+        
+        // Debug logging
+        if (CONFIG.DEBUG) {
+            console.log('🚀 App Starting...');
+            console.log('📱 Environment:', CONFIG.ENVIRONMENT);
+            console.log('🔗 API URL:', CONFIG.API_URL);
+            console.log('🎭 Mock Mode:', CONFIG.USE_MOCK);
+        }
+        
+        // ============================================
+        // MOCK DATA (for testing without API)
+        // ============================================
+        
+        const MOCK_DATA = {
+            vehicles: [
+                { id: 1, plateNumber: 'ABC-123', model: 'Toyota Camry', year: 2020, status: 'available', fuelType: 'Petrol', costPerKm: 0.15 },
+                { id: 2, plateNumber: 'XYZ-789', model: 'Honda Accord', year: 2021, status: 'available', fuelType: 'Petrol', costPerKm: 0.14 },
+                { id: 3, plateNumber: 'DEF-456', model: 'Ford Focus', year: 2019, status: 'in-use', fuelType: 'Diesel', costPerKm: 0.12 },
+                { id: 4, plateNumber: 'GHI-012', model: 'Tesla Model 3', year: 2022, status: 'maintenance', fuelType: 'Electric', costPerKm: 0.05 }
+            ],
+            trips: [
+                { id: 1, vehicleId: 1, driverName: 'John Doe', startDate: '2024-01-15', endDate: '2024-01-20', status: 'active', purpose: 'Delivery' },
+                { id: 2, vehicleId: 3, driverName: 'Jane Smith', startDate: '2024-01-16', endDate: '2024-01-18', status: 'active', purpose: 'Client Visit' }
+            ],
+            maintenance: [
+                { id: 1, vehicleId: 1, maintenanceType: 'Oil Change', cost: 150, date: '2024-01-10', description: 'Regular oil change' },
+                { id: 2, vehicleId: 2, maintenanceType: 'Tire Rotation', cost: 80, date: '2024-01-05', description: 'Rotated tires' }
+            ]
+        };
+        
+        // ============================================
+        // API CALL FUNCTION (handles both real and mock)
+        // ============================================
+        
         let currentUser = null;
         let authToken = null;
         
-        // Initialize
+        async function apiCall(action, params = {}) {
+            if (CONFIG.USE_MOCK) {
+                if (CONFIG.DEBUG) console.log('🎭 Mock API Call:', action, params);
+                return mockApiCall(action, params);
+            }
+            
+            const url = new URL(CONFIG.API_URL);
+            url.searchParams.append('action', action);
+            
+            // Add all parameters to URL
+            Object.keys(params).forEach(key => {
+                if (params[key] !== null && params[key] !== undefined) {
+                    url.searchParams.append(key, params[key]);
+                }
+            });
+            
+            if (CONFIG.DEBUG) console.log('📡 Real API Call:', url.toString());
+            
+            try {
+                const response = await fetch(url.toString(), {
+                    method: 'GET',
+                    mode: 'cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                if (CONFIG.DEBUG) console.log('📥 API Response:', data);
+                return data;
+            } catch (error) {
+                console.error('❌ API Error:', error);
+                if (CONFIG.DEBUG) {
+                    console.log('⚠️ Switching to mock mode due to API error');
+                    return mockApiCall(action, params);
+                }
+                return { success: false, message: error.message };
+            }
+        }
+        
+        function mockApiCall(action, params) {
+            switch(action) {
+                case 'login':
+                    if (params.email && params.password) {
+                        return {
+                            success: true,
+                            data: {
+                                user: { 
+                                    id: 1, 
+                                    name: 'Test User', 
+                                    email: params.email, 
+                                    role: params.email.includes('admin') ? 'admin' : 'driver' 
+                                },
+                                token: 'mock-token-' + Date.now()
+                            }
+                        };
+                    }
+                    return { success: false, message: 'Invalid credentials' };
+                    
+                case 'register':
+                    return { success: true, message: 'Registration successful', data: { id: Date.now() } };
+                    
+                case 'getVehicles':
+                    return { success: true, data: MOCK_DATA.vehicles };
+                    
+                case 'addVehicle':
+                    const newVehicle = {
+                        id: MOCK_DATA.vehicles.length + 1,
+                        plateNumber: params.plateNumber,
+                        model: params.model,
+                        year: parseInt(params.year),
+                        status: 'available',
+                        fuelType: params.fuelType,
+                        costPerKm: parseFloat(params.costPerKm) || 0.15
+                    };
+                    MOCK_DATA.vehicles.push(newVehicle);
+                    return { success: true, data: newVehicle };
+                    
+                case 'updateVehicle':
+                    const vehicleIndex = MOCK_DATA.vehicles.findIndex(v => v.id == params.vehicleId);
+                    if (vehicleIndex !== -1) {
+                        MOCK_DATA.vehicles[vehicleIndex] = { ...MOCK_DATA.vehicles[vehicleIndex], ...params };
+                        return { success: true, data: MOCK_DATA.vehicles[vehicleIndex] };
+                    }
+                    return { success: false, message: 'Vehicle not found' };
+                    
+                case 'deleteVehicle':
+                    const deleteIndex = MOCK_DATA.vehicles.findIndex(v => v.id == params.vehicleId);
+                    if (deleteIndex !== -1) {
+                        MOCK_DATA.vehicles.splice(deleteIndex, 1);
+                        return { success: true, message: 'Vehicle deleted' };
+                    }
+                    return { success: false, message: 'Vehicle not found' };
+                    
+                case 'getTrips':
+                    return { success: true, data: MOCK_DATA.trips };
+                    
+                case 'addTrip':
+                    const newTrip = {
+                        id: MOCK_DATA.trips.length + 1,
+                        vehicleId: parseInt(params.vehicleId),
+                        driverName: params.driverName,
+                        startDate: params.startDate,
+                        endDate: params.endDate,
+                        status: 'active',
+                        purpose: params.purpose,
+                        startOdometer: parseInt(params.startOdometer) || 0
+                    };
+                    MOCK_DATA.trips.push(newTrip);
+                    // Update vehicle status
+                    const tripVehicle = MOCK_DATA.vehicles.find(v => v.id == params.vehicleId);
+                    if (tripVehicle) tripVehicle.status = 'in-use';
+                    return { success: true, data: newTrip };
+                    
+                case 'getMaintenance':
+                    return { success: true, data: MOCK_DATA.maintenance };
+                    
+                case 'addMaintenance':
+                    const newMaint = {
+                        id: MOCK_DATA.maintenance.length + 1,
+                        vehicleId: parseInt(params.vehicleId),
+                        maintenanceType: params.maintenanceType,
+                        cost: parseFloat(params.cost),
+                        date: params.date,
+                        description: params.description || ''
+                    };
+                    MOCK_DATA.maintenance.push(newMaint);
+                    return { success: true, data: newMaint };
+                    
+                case 'checkAvailability':
+                    const available = MOCK_DATA.vehicles.filter(v => v.status === 'available');
+                    return { success: true, data: available };
+                    
+                case 'sendNotification':
+                    console.log('📧 Mock Email Sent to:', params.email);
+                    console.log('Subject:', params.subject);
+                    return { success: true, message: 'Email sent (mock)' };
+                    
+                default:
+                    return { success: false, message: 'Unknown action: ' + action };
+            }
+        }
+        
+        // ============================================
+        // AUTHENTICATION FUNCTIONS
+        // ============================================
+        
         document.addEventListener('DOMContentLoaded', () => {
+            if (CONFIG.DEBUG) console.log('📄 DOM loaded, initializing...');
             checkLoginStatus();
             document.getElementById('loginForm').addEventListener('submit', handleLogin);
             document.getElementById('registerForm').addEventListener('submit', handleRegister);
-            document.getElementById('tripForm').addEventListener('submit', handleBookTrip);
-            document.getElementById('maintenanceForm').addEventListener('submit', handleAddMaintenance);
         });
         
-        // Authentication Functions
         function checkLoginStatus() {
-            const token = localStorage.getItem('authToken');
-            const user = localStorage.getItem('currentUser');
-            if (token && user) {
-                authToken = token;
-                currentUser = JSON.parse(user);
+            const savedUser = localStorage.getItem('currentUser');
+            const savedToken = localStorage.getItem('authToken');
+            if (savedUser && savedToken) {
+                currentUser = JSON.parse(savedUser);
+                authToken = savedToken;
+                if (CONFIG.DEBUG) console.log('✅ User logged in:', currentUser.email);
                 showDashboard();
                 loadDashboardData();
             }
@@ -514,25 +758,23 @@
             const email = document.getElementById('loginEmail').value;
             const password = document.getElementById('loginPassword').value;
             
-            showLoading();
+            showLoading(true);
             
-            try {
-                const response = await fetch(`${API_URL}?action=login&email=${email}&password=${password}`);
-                const data = await response.json();
-                
-                if (data.success) {
-                    authToken = data.data.token;
-                    currentUser = data.data.user;
-                    localStorage.setItem('authToken', authToken);
-                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
-                    showDashboard();
-                    loadDashboardData();
-                } else {
-                    showAlert('Login failed: ' + data.message, 'error');
-                }
-            } catch (error) {
-                showAlert('Network error: ' + error.message, 'error');
+            const data = await apiCall('login', { email, password });
+            
+            if (data.success) {
+                currentUser = data.data.user;
+                authToken = data.data.token;
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                localStorage.setItem('authToken', authToken);
+                showAlert(`Welcome back, ${currentUser.name}!`, 'success');
+                showDashboard();
+                loadDashboardData();
+            } else {
+                showAlert('Login failed: ' + data.message, 'error');
             }
+            
+            showLoading(false);
         }
         
         async function handleRegister(e) {
@@ -542,41 +784,92 @@
             const password = document.getElementById('regPassword').value;
             const role = document.getElementById('regRole').value;
             
-            try {
-                const response = await fetch(`${API_URL}?action=register&name=${name}&email=${email}&password=${password}&role=${role}`);
-                const data = await response.json();
-                
-                if (data.success) {
-                    showAlert('Registration successful! Please login.', 'success');
-                    showLogin();
-                } else {
-                    showAlert('Registration failed: ' + data.message, 'error');
-                }
-            } catch (error) {
-                showAlert('Network error: ' + error.message, 'error');
+            showLoading(true);
+            
+            const data = await apiCall('register', { name, email, password, role });
+            
+            if (data.success) {
+                showAlert('Registration successful! Please login.', 'success');
+                showLogin();
+                document.getElementById('registerForm').reset();
+            } else {
+                showAlert('Registration failed: ' + data.message, 'error');
             }
+            
+            showLoading(false);
         }
         
-        // Dashboard Functions
+        // ============================================
+        // DASHBOARD FUNCTIONS
+        // ============================================
+        
         async function loadDashboardData() {
+            if (CONFIG.DEBUG) console.log('📊 Loading dashboard data...');
             await loadVehicles();
             await loadTrips();
             await loadMaintenance();
             await loadStats();
-            await checkVehicleAvailability();
+            await checkAvailability();
         }
         
+        async function loadStats() {
+            const vehicles = await apiCall('getVehicles', { token: authToken });
+            const trips = await apiCall('getTrips', { token: authToken });
+            const maintenance = await apiCall('getMaintenance', { token: authToken });
+            
+            const totalVehicles = vehicles.success ? vehicles.data.length : 0;
+            const activeTrips = trips.success ? trips.data.filter(t => t.status === 'active').length : 0;
+            const totalMaintenanceCost = maintenance.success ? 
+                maintenance.data.reduce((sum, m) => sum + (m.cost || 0), 0) : 0;
+            
+            const statsHtml = `
+                <div class="stat-card">
+                    <h3>🚗 Total Vehicles</h3>
+                    <div class="value">${totalVehicles}</div>
+                </div>
+                <div class="stat-card">
+                    <h3>📅 Active Trips</h3>
+                    <div class="value">${activeTrips}</div>
+                </div>
+                <div class="stat-card">
+                    <h3>💰 Maintenance Cost</h3>
+                    <div class="value">$${totalMaintenanceCost.toLocaleString()}</div>
+                </div>
+                <div class="stat-card">
+                    <h3>👤 Logged in as</h3>
+                    <div class="value" style="font-size: 18px;">${currentUser?.name || 'User'}</div>
+                    <div style="font-size: 12px; margin-top: 5px;">${currentUser?.role || 'role'}</div>
+                </div>
+            `;
+            document.getElementById('statsCards').innerHTML = statsHtml;
+        }
+        
+        async function checkAvailability() {
+            const data = await apiCall('checkAvailability');
+            if (data.success && data.data.length > 0) {
+                const html = data.data.map(vehicle => `
+                    <div style="padding: 12px; margin: 8px 0; background: #f5f5f5; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <strong>${vehicle.plateNumber}</strong> - ${vehicle.model} (${vehicle.year})
+                        </div>
+                        <span class="status-badge status-available">✓ Available</span>
+                    </div>
+                `).join('');
+                document.getElementById('availabilityList').innerHTML = html;
+            } else {
+                document.getElementById('availabilityList').innerHTML = '<p>No vehicles available for the next 7 days</p>';
+            }
+        }
+        
+        // ============================================
+        // VEHICLE FUNCTIONS
+        // ============================================
+        
         async function loadVehicles() {
-            try {
-                const response = await fetch(`${API_URL}?action=getVehicles&token=${authToken}`);
-                const data = await response.json();
-                
-                if (data.success) {
-                    displayVehicles(data.data);
-                    populateVehicleSelects(data.data);
-                }
-            } catch (error) {
-                console.error('Error loading vehicles:', error);
+            const data = await apiCall('getVehicles', { token: authToken });
+            if (data.success) {
+                displayVehicles(data.data);
+                populateVehicleSelects(data.data);
             }
         }
         
@@ -584,17 +877,26 @@
             const tbody = document.querySelector('#vehiclesTable tbody');
             tbody.innerHTML = '';
             
+            if (vehicles.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No vehicles found</td></tr>';
+                return;
+            }
+            
             vehicles.forEach(vehicle => {
                 const row = tbody.insertRow();
+                let statusClass = 'status-available';
+                if (vehicle.status === 'in-use') statusClass = 'status-inuse';
+                if (vehicle.status === 'maintenance') statusClass = 'status-maintenance';
+                
                 row.innerHTML = `
                     <td>${vehicle.plateNumber}</td>
                     <td>${vehicle.model}</td>
                     <td>${vehicle.year}</td>
-                    <td><span class="status-badge status-${vehicle.status.replace('-', '')}">${vehicle.status}</span></td>
+                    <td><span class="status-badge ${statusClass}">${vehicle.status}</span></td>
                     <td>
-                        ${currentUser.role === 'admin' ? 
-                            `<button onclick="editVehicle(${vehicle.id})" style="width: auto; margin-right: 5px;">Edit</button>
-                             <button onclick="deleteVehicle(${vehicle.id})" style="width: auto;">Delete</button>` : 
+                        ${currentUser?.role === 'admin' ? 
+                            `<button onclick="editVehicle(${vehicle.id})" style="width: auto; padding: 5px 10px; margin-right: 5px;">✏️ Edit</button>
+                             <button onclick="deleteVehicle(${vehicle.id})" style="width: auto; padding: 5px 10px; background: #dc3545;">🗑️ Delete</button>` : 
                             ''}
                     </td>
                 `;
@@ -608,32 +910,65 @@
             const fuelType = document.getElementById('vehicleFuelType').value;
             const costPerKm = document.getElementById('vehicleCostPerKm').value;
             
-            try {
-                const response = await fetch(`${API_URL}?action=addVehicle&token=${authToken}&plateNumber=${plateNumber}&model=${model}&year=${year}&fuelType=${fuelType}&costPerKm=${costPerKm}`);
-                const data = await response.json();
-                
+            if (!plateNumber || !model || !year) {
+                showAlert('Please fill all required fields', 'error');
+                return;
+            }
+            
+            showLoading(true);
+            
+            const data = await apiCall('addVehicle', {
+                token: authToken,
+                plateNumber,
+                model,
+                year,
+                fuelType,
+                costPerKm
+            });
+            
+            if (data.success) {
+                showAlert('Vehicle added successfully!', 'success');
+                loadVehicles();
+                document.getElementById('addVehicleForm').style.display = 'none';
+                document.getElementById('vehiclePlate').value = '';
+                document.getElementById('vehicleModel').value = '';
+                document.getElementById('vehicleYear').value = '';
+                document.getElementById('vehicleFuelType').value = '';
+                document.getElementById('vehicleCostPerKm').value = '';
+            } else {
+                showAlert('Error: ' + data.message, 'error');
+            }
+            
+            showLoading(false);
+        }
+        
+        async function deleteVehicle(id) {
+            if (confirm('Are you sure you want to delete this vehicle?')) {
+                showLoading(true);
+                const data = await apiCall('deleteVehicle', { token: authToken, vehicleId: id });
                 if (data.success) {
-                    showAlert('Vehicle added successfully!', 'success');
+                    showAlert('Vehicle deleted', 'success');
                     loadVehicles();
-                    document.getElementById('addVehicleForm').style.display = 'none';
                 } else {
                     showAlert('Error: ' + data.message, 'error');
                 }
-            } catch (error) {
-                showAlert('Network error: ' + error.message, 'error');
+                showLoading(false);
             }
         }
         
+        function editVehicle(id) {
+            showAlert('Edit feature coming soon!', 'success');
+            console.log('Edit vehicle:', id);
+        }
+        
+        // ============================================
+        // TRIP FUNCTIONS
+        // ============================================
+        
         async function loadTrips() {
-            try {
-                const response = await fetch(`${API_URL}?action=getTrips&token=${authToken}`);
-                const data = await response.json();
-                
-                if (data.success) {
-                    displayTrips(data.data);
-                }
-            } catch (error) {
-                console.error('Error loading trips:', error);
+            const data = await apiCall('getTrips', { token: authToken });
+            if (data.success) {
+                displayTrips(data.data);
             }
         }
         
@@ -641,320 +976,24 @@
             const tbody = document.querySelector('#tripsTable tbody');
             tbody.innerHTML = '';
             
+            if (trips.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No active trips</td></tr>';
+                return;
+            }
+            
             trips.forEach(trip => {
                 const row = tbody.insertRow();
                 row.innerHTML = `
                     <td>${trip.vehicleId}</td>
                     <td>${trip.driverName}</td>
-                    <td>${new Date(trip.startDate).toLocaleDateString()}</td>
-                    <td>${new Date(trip.endDate).toLocaleDateString()}</td>
-                    <td><span class="status-badge">${trip.status}</span></td>
+                    <td>${trip.startDate || 'N/A'}</td>
+                    <td>${trip.endDate || 'N/A'}</td>
+                    <td><span class="status-badge status-inuse">${trip.status}</span></td>
                 `;
             });
         }
         
-        async function handleBookTrip(e) {
-            e.preventDefault();
+        async function bookTrip() {
             const vehicleId = document.getElementById('tripVehicleId').value;
             const driverName = document.getElementById('tripDriverName').value;
-            const startDate = document.getElementById('tripStartDate').value;
-            const endDate = document.getElementById('tripEndDate').value;
-            const purpose = document.getElementById('tripPurpose').value;
-            const startOdometer = document.getElementById('tripStartOdometer').value;
-            
-            try {
-                const response = await fetch(`${API_URL}?action=addTrip&token=${authToken}&vehicleId=${vehicleId}&driverName=${driverName}&startDate=${startDate}&endDate=${endDate}&purpose=${purpose}&startOdometer=${startOdometer}`);
-                const data = await response.json();
-                
-                if (data.success) {
-                    showAlert('Trip booked successfully!', 'success');
-                    loadTrips();
-                    document.getElementById('tripForm').reset();
-                } else {
-                    showAlert('Error: ' + data.message, 'error');
-                }
-            } catch (error) {
-                showAlert('Network error: ' + error.message, 'error');
-            }
-        }
-        
-        async function loadMaintenance() {
-            try {
-                const response = await fetch(`${API_URL}?action=getMaintenance&token=${authToken}`);
-                const data = await response.json();
-                
-                if (data.success) {
-                    displayMaintenance(data.data);
-                }
-            } catch (error) {
-                console.error('Error loading maintenance:', error);
-            }
-        }
-        
-        function displayMaintenance(maintenance) {
-            const tbody = document.querySelector('#maintenanceTable tbody');
-            tbody.innerHTML = '';
-            
-            maintenance.forEach(record => {
-                const row = tbody.insertRow();
-                row.innerHTML = `
-                    <td>${record.vehicleId}</td>
-                    <td>${record.maintenanceType}</td>
-                    <td>$${record.cost}</td>
-                    <td>${new Date(record.date).toLocaleDateString()}</td>
-                    <td>${record.description}</td>
-                `;
-            });
-        }
-        
-        async function handleAddMaintenance(e) {
-            e.preventDefault();
-            const vehicleId = document.getElementById('maintenanceVehicleId').value;
-            const maintenanceType = document.getElementById('maintenanceType').value;
-            const cost = document.getElementById('maintenanceCost').value;
-            const date = document.getElementById('maintenanceDate').value;
-            const description = document.getElementById('maintenanceDescription').value;
-            
-            try {
-                const response = await fetch(`${API_URL}?action=addMaintenance&token=${authToken}&vehicleId=${vehicleId}&maintenanceType=${maintenanceType}&cost=${cost}&date=${date}&description=${description}`);
-                const data = await response.json();
-                
-                if (data.success) {
-                    showAlert('Maintenance record added!', 'success');
-                    loadMaintenance();
-                    document.getElementById('maintenanceForm').reset();
-                } else {
-                    showAlert('Error: ' + data.message, 'error');
-                }
-            } catch (error) {
-                showAlert('Network error: ' + error.message, 'error');
-            }
-        }
-        
-        async function loadStats() {
-            try {
-                const response = await fetch(`${API_URL}?action=getReports&token=${authToken}&reportType=costs`);
-                const data = await response.json();
-                
-                if (data.success) {
-                    const statsHtml = `
-                        <div class="stat-card">
-                            <h3>Total Vehicles</h3>
-                            <div class="value">${document.querySelectorAll('#vehiclesTable tbody tr').length}</div>
-                        </div>
-                        <div class="stat-card">
-                            <h3>Active Trips</h3>
-                            <div class="value">${document.querySelectorAll('#tripsTable tbody tr').length}</div>
-                        </div>
-                        <div class="stat-card">
-                            <h3>Total Maintenance Cost</h3>
-                            <div class="value">$${data.data.totalMaintenanceCost.toFixed(2)}</div>
-                        </div>
-                        <div class="stat-card">
-                            <h3>Total Cost (All Time)</h3>
-                            <div class="value">$${data.data.totalCost.toFixed(2)}</div>
-                        </div>
-                    `;
-                    document.getElementById('statsCards').innerHTML = statsHtml;
-                }
-            } catch (error) {
-                console.error('Error loading stats:', error);
-            }
-        }
-        
-        async function checkVehicleAvailability() {
-            const today = new Date().toISOString().split('T')[0];
-            const nextWeek = new Date(Date.now() + 7*24*60*60*1000).toISOString().split('T')[0];
-            
-            try {
-                const response = await fetch(`${API_URL}?action=checkAvailability&startDate=${today}&endDate=${nextWeek}`);
-                const data = await response.json();
-                
-                if (data.success) {
-                    const availabilityHtml = data.data.map(vehicle => `
-                        <div style="padding: 10px; margin: 5px; background: #f5f5f5; border-radius: 8px;">
-                            <strong>${vehicle.plateNumber}</strong> - ${vehicle.model} 
-                            <span class="status-badge status-available">Available</span>
-                        </div>
-                    `).join('');
-                    document.getElementById('availabilityList').innerHTML = availabilityHtml || '<p>No vehicles available</p>';
-                }
-            } catch (error) {
-                console.error('Error checking availability:', error);
-            }
-        }
-        
-        async function generateReport() {
-            const startDate = document.getElementById('reportStartDate').value;
-            const endDate = document.getElementById('reportEndDate').value;
-            const reportType = document.getElementById('reportType').value;
-            
-            try {
-                const response = await fetch(`${API_URL}?action=getReports&token=${authToken}&reportType=${reportType}&startDate=${startDate}&endDate=${endDate}`);
-                const data = await response.json();
-                
-                if (data.success) {
-                    displayReport(data.data, reportType);
-                } else {
-                    showAlert('Error generating report', 'error');
-                }
-            } catch (error) {
-                showAlert('Network error: ' + error.message, 'error');
-            }
-        }
-        
-        function displayReport(report, type) {
-            let html = '';
-            
-            if (type === 'usage') {
-                html = '<h4>Usage Report</h4><table><thead><tr><th>Vehicle</th><th>Driver</th><th>Distance (km)</th><th>Purpose</th></tr></thead><tbody>';
-                report.forEach(trip => {
-                    html += `<tr><td>${trip.vehicleId}</td><td>${trip.driverName}</td><td>${trip.distance}</td><td>${trip.purpose}</td></tr>`;
-                });
-                html += '</tbody></table>';
-            } else if (type === 'maintenance') {
-                html = '<h4>Maintenance Report</h4><table><thead><tr><th>Vehicle</th><th>Type</th><th>Cost</th><th>Date</th></tr></thead><tbody>';
-                report.forEach(record => {
-                    html += `<tr><td>${record.vehicleId}</td><td>${record.type}</td><td>$${record.cost}</td><td>${new Date(record.date).toLocaleDateString()}</td></tr>`;
-                });
-                html += '</tbody></table>';
-            } else if (type === 'costs') {
-                html = `
-                    <h4>Cost Report (${new Date(report.startDate).toLocaleDateString()} - ${new Date(report.endDate).toLocaleDateString()})</h4>
-                    <div class="cards-grid">
-                        <div class="stat-card"><h3>Maintenance Cost</h3><div class="value">$${report.totalMaintenanceCost.toFixed(2)}</div></div>
-                        <div class="stat-card"><h3>Fuel Cost</h3><div class="value">$${report.totalFuelCost.toFixed(2)}</div></div>
-                        <div class="stat-card"><h3>Total Cost</h3><div class="value">$${report.totalCost.toFixed(2)}</div></div>
-                    </div>
-                `;
-            }
-            
-            document.getElementById('reportOutput').innerHTML = html;
-        }
-        
-        async function emailReport() {
-            const reportHtml = document.getElementById('reportOutput').innerHTML;
-            const subject = `Fleet Report - ${new Date().toLocaleDateString()}`;
-            
-            try {
-                const response = await fetch(`${API_URL}?action=sendNotification&token=${authToken}&email=${currentUser.email}&subject=${subject}&body=${encodeURIComponent(reportHtml)}`);
-                const data = await response.json();
-                
-                if (data.success) {
-                    showAlert('Report sent to your email!', 'success');
-                } else {
-                    showAlert('Error sending email', 'error');
-                }
-            } catch (error) {
-                showAlert('Network error: ' + error.message, 'error');
-            }
-        }
-        
-        function populateVehicleSelects(vehicles) {
-            const tripSelect = document.getElementById('tripVehicleId');
-            const maintSelect = document.getElementById('maintenanceVehicleId');
-            
-            tripSelect.innerHTML = '<option value="">Select Vehicle</option>';
-            maintSelect.innerHTML = '<option value="">Select Vehicle</option>';
-            
-            vehicles.forEach(vehicle => {
-                tripSelect.innerHTML += `<option value="${vehicle.id}">${vehicle.plateNumber} - ${vehicle.model}</option>`;
-                maintSelect.innerHTML += `<option value="${vehicle.id}">${vehicle.plateNumber} - ${vehicle.model}</option>`;
-            });
-        }
-        
-        // UI Functions
-        function showDashboard() {
-            document.getElementById('loginContainer').style.display = 'none';
-            document.getElementById('registerContainer').style.display = 'none';
-            document.getElementById('dashboard').style.display = 'block';
-        }
-        
-        function showLogin() {
-            document.getElementById('loginContainer').style.display = 'flex';
-            document.getElementById('registerContainer').style.display = 'none';
-            document.getElementById('dashboard').style.display = 'none';
-        }
-        
-        function showRegister() {
-            document.getElementById('loginContainer').style.display = 'none';
-            document.getElementById('registerContainer').style.display = 'flex';
-            document.getElementById('dashboard').style.display = 'none';
-        }
-        
-        function showSection(section) {
-            document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
-            document.getElementById(`${section}Section`).classList.add('active');
-            
-            if (section === 'dashboard') {
-                loadDashboardData();
-            } else if (section === 'vehicles') {
-                loadVehicles();
-            } else if (section === 'trips') {
-                loadTrips();
-            } else if (section === 'maintenance') {
-                loadMaintenance();
-            }
-        }
-        
-        function showAddVehicleForm() {
-            const form = document.getElementById('addVehicleForm');
-            form.style.display = form.style.display === 'none' ? 'grid' : 'none';
-        }
-        
-        function toggleMobileMenu() {
-            document.getElementById('navLinks').classList.toggle('show');
-        }
-        
-        function logout() {
-            localStorage.removeItem('authToken');
-            localStorage.removeItem('currentUser');
-            showLogin();
-        }
-        
-        function showAlert(message, type) {
-            const alertDiv = document.createElement('div');
-            alertDiv.className = `alert alert-${type}`;
-            alertDiv.textContent = message;
-            document.querySelector('.container').prepend(alertDiv);
-            setTimeout(() => alertDiv.remove(), 3000);
-        }
-        
-        function showLoading() {
-            // Implement loading indicator if needed
-        }
-        
-        // Admin-only functions
-        function editVehicle(id) {
-            // Implement edit functionality
-            alert('Edit vehicle ' + id);
-        }
-        
-        async function deleteVehicle(id) {
-            if (confirm('Are you sure you want to delete this vehicle?')) {
-                try {
-                    const response = await fetch(`${API_URL}?action=deleteVehicle&token=${authToken}&vehicleId=${id}`);
-                    const data = await response.json();
-                    
-                    if (data.success) {
-                        showAlert('Vehicle deleted successfully!', 'success');
-                        loadVehicles();
-                    } else {
-                        showAlert('Error: ' + data.message, 'error');
-                    }
-                } catch (error) {
-                    showAlert('Network error: ' + error.message, 'error');
-                }
-            }
-        }
-    </script>
-    <!-- At the bottom of your index.html, update the configuration -->
-<script>
-    // Production configuration for GitHub Pages
-    let API_URL = 'https://script.google.com/macros/s/AKfycbyPwiKpD7MymR-QMbDuiBx7V9uSKQl1WcRET8b3hTVpz8C06DgLLZ7O02aE3v3JPY6-/exec';
-    let USE_MOCK = false;  // Set to false for production
-    
-    // Rest of your JavaScript code...
-</script>
-</body>
-</html>
+           
