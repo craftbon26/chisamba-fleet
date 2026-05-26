@@ -993,7 +993,345 @@
             });
         }
         
-        async function bookTrip() {
+             async function bookTrip() {
             const vehicleId = document.getElementById('tripVehicleId').value;
             const driverName = document.getElementById('tripDriverName').value;
-           
+            const startDate = document.getElementById('tripStartDate').value;
+            const endDate = document.getElementById('tripEndDate').value;
+            const purpose = document.getElementById('tripPurpose').value;
+            const startOdometer = document.getElementById('tripStartOdometer').value;
+            
+            if (!vehicleId || !driverName || !startDate || !endDate) {
+                showAlert('Please fill all required fields', 'error');
+                return;
+            }
+            
+            showLoading(true);
+            
+            const data = await apiCall('addTrip', {
+                token: authToken,
+                vehicleId,
+                driverName,
+                startDate,
+                endDate,
+                purpose,
+                startOdometer
+            });
+            
+            if (data.success) {
+                showAlert('Trip booked successfully!', 'success');
+                loadTrips();
+                loadVehicles(); // Refresh vehicle statuses
+                document.getElementById('tripDriverName').value = '';
+                document.getElementById('tripPurpose').value = '';
+                document.getElementById('tripStartOdometer').value = '';
+            } else {
+                showAlert('Error: ' + data.message, 'error');
+            }
+            
+            showLoading(false);
+        }
+        
+        // ============================================
+        // MAINTENANCE FUNCTIONS
+        // ============================================
+        
+        async function loadMaintenance() {
+            const data = await apiCall('getMaintenance', { token: authToken });
+            if (data.success) {
+                displayMaintenance(data.data);
+            }
+        }
+        
+        function displayMaintenance(maintenance) {
+            const tbody = document.querySelector('#maintenanceTable tbody');
+            tbody.innerHTML = '';
+            
+            if (maintenance.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No maintenance records</td></tr>';
+                return;
+            }
+            
+            maintenance.forEach(record => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${record.vehicleId}</td>
+                    <td>${record.maintenanceType}</td>
+                    <td>$${record.cost.toLocaleString()}</td>
+                    <td>${record.date}</td>
+                    <td>${record.description || '-'}</td>
+                `;
+            });
+        }
+        
+        async function addMaintenance() {
+            const vehicleId = document.getElementById('maintenanceVehicleId').value;
+            const maintenanceType = document.getElementById('maintenanceType').value;
+            const cost = document.getElementById('maintenanceCost').value;
+            const date = document.getElementById('maintenanceDate').value;
+            const description = document.getElementById('maintenanceDescription').value;
+            
+            if (!vehicleId || !cost || !date) {
+                showAlert('Please fill all required fields', 'error');
+                return;
+            }
+            
+            showLoading(true);
+            
+            const data = await apiCall('addMaintenance', {
+                token: authToken,
+                vehicleId,
+                maintenanceType,
+                cost,
+                date,
+                description
+            });
+            
+            if (data.success) {
+                showAlert('Maintenance record added!', 'success');
+                loadMaintenance();
+                document.getElementById('maintenanceCost').value = '';
+                document.getElementById('maintenanceDescription').value = '';
+            } else {
+                showAlert('Error: ' + data.message, 'error');
+            }
+            
+            showLoading(false);
+        }
+        
+        // ============================================
+        // REPORT FUNCTIONS
+        // ============================================
+        
+        async function generateReport() {
+            const startDate = document.getElementById('reportStartDate').value;
+            const endDate = document.getElementById('reportEndDate').value;
+            const reportType = document.getElementById('reportType').value;
+            
+            showLoading(true);
+            
+            if (reportType === 'usage') {
+                const trips = await apiCall('getTrips', { token: authToken });
+                if (trips.success) {
+                    let filteredTrips = trips.data;
+                    if (startDate && endDate) {
+                        filteredTrips = trips.data.filter(trip => 
+                            trip.startDate >= startDate && trip.endDate <= endDate
+                        );
+                    }
+                    
+                    if (filteredTrips.length === 0) {
+                        document.getElementById('reportOutput').innerHTML = '<p>No trips found for the selected period</p>';
+                    } else {
+                        let html = '<h4>📊 Usage Report</h4><div class="table-responsive"><table border="1" cellpadding="10" style="width:100%"><thead><tr><th>Vehicle ID</th><th>Driver</th><th>Dates</th><th>Purpose</th><th>Status</th></tr></thead><tbody>';
+                        filteredTrips.forEach(trip => {
+                            html += `<tr>
+                                <td>${trip.vehicleId}</td>
+                                <td>${trip.driverName}</td>
+                                <td>${trip.startDate} to ${trip.endDate}</td>
+                                <td>${trip.purpose || '-'}</td>
+                                <td>${trip.status}</td>
+                            </tr>`;
+                        });
+                        html += '</tbody></table></div>';
+                        document.getElementById('reportOutput').innerHTML = html;
+                    }
+                }
+            } 
+            else if (reportType === 'maintenance') {
+                const maintenance = await apiCall('getMaintenance', { token: authToken });
+                if (maintenance.success) {
+                    let filteredMaint = maintenance.data;
+                    if (startDate && endDate) {
+                        filteredMaint = maintenance.data.filter(m => m.date >= startDate && m.date <= endDate);
+                    }
+                    
+                    if (filteredMaint.length === 0) {
+                        document.getElementById('reportOutput').innerHTML = '<p>No maintenance records found for the selected period</p>';
+                    } else {
+                        let html = '<h4>🔧 Maintenance Report</h4><div class="table-responsive"><table border="1" cellpadding="10" style="width:100%"><thead><tr><th>Vehicle ID</th><th>Type</th><th>Cost</th><th>Date</th><th>Description</th></tr></thead><tbody>';
+                        filteredMaint.forEach(m => {
+                            html += `<tr>
+                                <td>${m.vehicleId}</td>
+                                <td>${m.maintenanceType}</td>
+                                <td>$${m.cost.toLocaleString()}</td>
+                                <td>${m.date}</td>
+                                <td>${m.description || '-'}</td>
+                            </tr>`;
+                        });
+                        html += '</tbody></table></div>';
+                        document.getElementById('reportOutput').innerHTML = html;
+                    }
+                }
+            }
+            else if (reportType === 'costs') {
+                const maintenance = await apiCall('getMaintenance', { token: authToken });
+                if (maintenance.success) {
+                    let filteredMaint = maintenance.data;
+                    if (startDate && endDate) {
+                        filteredMaint = maintenance.data.filter(m => m.date >= startDate && m.date <= endDate);
+                    }
+                    const totalCost = filteredMaint.reduce((sum, m) => sum + m.cost, 0);
+                    
+                    document.getElementById('reportOutput').innerHTML = `
+                        <h4>💰 Cost Report</h4>
+                        <div class="cards-grid">
+                            <div class="stat-card">
+                                <h3>Period</h3>
+                                <div class="value" style="font-size: 16px;">${startDate || 'Start'} to ${endDate || 'End'}</div>
+                            </div>
+                            <div class="stat-card">
+                                <h3>Total Maintenance Cost</h3>
+                                <div class="value">$${totalCost.toLocaleString()}</div>
+                            </div>
+                            <div class="stat-card">
+                                <h3>Number of Records</h3>
+                                <div class="value">${filteredMaint.length}</div>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table border="1" cellpadding="10" style="width:100%; margin-top:20px">
+                                <thead><tr><th>Date</th><th>Vehicle</th><th>Type</th><th>Cost</th></tr></thead>
+                                <tbody>
+                                    ${filteredMaint.map(m => `<tr>
+                                        <td>${m.date}</td>
+                                        <td>${m.vehicleId}</td>
+                                        <td>${m.maintenanceType}</td>
+                                        <td>$${m.cost.toLocaleString()}</td>
+                                    </tr>`).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    `;
+                }
+            }
+            
+            showLoading(false);
+        }
+        
+        async function emailReport() {
+            const reportHtml = document.getElementById('reportOutput').innerHTML;
+            if (!reportHtml || reportHtml === '<p>No trips found for the selected period</p>') {
+                showAlert('Please generate a report first', 'error');
+                return;
+            }
+            
+            const subject = `Fleet Report - ${new Date().toLocaleDateString()}`;
+            
+            showLoading(true);
+            
+            const data = await apiCall('sendNotification', {
+                token: authToken,
+                email: currentUser.email,
+                subject: subject,
+                body: encodeURIComponent(reportHtml)
+            });
+            
+            if (data.success) {
+                showAlert('Report sent to your email!', 'success');
+            } else {
+                showAlert('Error sending email: ' + data.message, 'error');
+            }
+            
+            showLoading(false);
+        }
+        
+        // ============================================
+        // HELPER FUNCTIONS
+        // ============================================
+        
+        function populateVehicleSelects(vehicles) {
+            const tripSelect = document.getElementById('tripVehicleId');
+            const maintSelect = document.getElementById('maintenanceVehicleId');
+            
+            tripSelect.innerHTML = '<option value="">Select Vehicle</option>';
+            maintSelect.innerHTML = '<option value="">Select Vehicle</option>';
+            
+            vehicles.forEach(vehicle => {
+                if (vehicle.status === 'available') {
+                    tripSelect.innerHTML += `<option value="${vehicle.id}">${vehicle.plateNumber} - ${vehicle.model}</option>`;
+                }
+                maintSelect.innerHTML += `<option value="${vehicle.id}">${vehicle.plateNumber} - ${vehicle.model}</option>`;
+            });
+        }
+        
+        function showDashboard() {
+            document.getElementById('loginContainer').style.display = 'none';
+            document.getElementById('registerContainer').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'block';
+            
+            // Update active nav button
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+        }
+        
+        function showLogin() {
+            document.getElementById('loginContainer').style.display = 'flex';
+            document.getElementById('registerContainer').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'none';
+        }
+        
+        function showRegister() {
+            document.getElementById('loginContainer').style.display = 'none';
+            document.getElementById('registerContainer').style.display = 'flex';
+            document.getElementById('dashboard').style.display = 'none';
+        }
+        
+        function showSection(section) {
+            document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+            document.getElementById(`${section}Section`).classList.add('active');
+            
+            // Update active nav button
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.textContent.includes(section.charAt(0).toUpperCase() + section.slice(1))) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            // Load data for the section
+            if (section === 'dashboard') loadDashboardData();
+            else if (section === 'vehicles') loadVehicles();
+            else if (section === 'trips') loadTrips();
+            else if (section === 'maintenance') loadMaintenance();
+        }
+        
+        function showAddVehicleForm() {
+            const form = document.getElementById('addVehicleForm');
+            form.style.display = form.style.display === 'none' ? 'grid' : 'none';
+        }
+        
+        function logout() {
+            localStorage.clear();
+            currentUser = null;
+            authToken = null;
+            showLogin();
+            showAlert('Logged out successfully', 'success');
+        }
+        
+        function showAlert(message, type) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.textContent = message;
+            const container = document.querySelector('.container') || document.querySelector('.login-container');
+            container.prepend(alertDiv);
+            setTimeout(() => alertDiv.remove(), 3000);
+        }
+        
+        function showLoading(show) {
+            // Simple loading indicator - you can enhance this
+            if (show) {
+                document.body.style.cursor = 'wait';
+            } else {
+                document.body.style.cursor = 'default';
+            }
+        }
+        
+        // Initial console log
+        console.log(`✅ ${CONFIG.APP_NAME} v${CONFIG.APP_VERSION} is ready!`);
+        console.log(`🌍 Environment: ${CONFIG.ENVIRONMENT}`);
+        console.log(`🔗 API Endpoint: ${CONFIG.API_URL}`);
+    </script>
+</body>
+</html>
